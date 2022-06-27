@@ -1,5 +1,9 @@
-const asyncHandler = require('../middlewares/async');
+exports.secretUserForAdmin = (req, res) => {
+  console.log(req.user);
+  res.json({ message: 'secure only for admin' });
+};
 
-exports.test = asyncHandler(async (req, res, next) => {
-  res.json({ message: 'test done!' });
-});
+exports.secretUserForUser = (req, res) => {
+  console.log(req.user);
+  res.json({ message: 'secure only for user' });
+};

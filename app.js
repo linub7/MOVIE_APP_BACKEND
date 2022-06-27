@@ -5,6 +5,7 @@ const colors = require('colors');
 const morgan = require('morgan');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const mongoSanitize = require('express-mongo-sanitize');
 
 const errorHandler = require('./middlewares/error');
 
@@ -16,7 +17,7 @@ if (process.env.NODE_ENV === 'development') {
 
 app.use(express.json());
 app.use(cors({ origin: 'http://localhost:3000' }));
-app.use(errorHandler);
+app.use(mongoSanitize());
 
 readdirSync('./routes').map((r) =>
   app.use('/api/v1', require('./routes/' + r))
@@ -31,6 +32,8 @@ mongoose
     console.log('Error connecting to MongoDB'.red);
     console.log(err);
   });
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
