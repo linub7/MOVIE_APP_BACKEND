@@ -25,12 +25,15 @@ const userSchema = new mongoose.Schema(
       trim: true,
       required: [true, 'Please add a password'],
       minLength: 6,
-      maxLength: 20,
     },
     role: {
       type: String,
       enum: ['user', 'admin'],
       default: 'user',
+    },
+    isVerified: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
