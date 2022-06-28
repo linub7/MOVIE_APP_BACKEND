@@ -1,12 +1,13 @@
 const User = require('../models/user');
 const EmailVerificationToken = require('../models/emailVerificationToken');
-const nodemailer = require('nodemailer');
+const PasswordResetToken = require('../models/passwordResetToken');
 const asyncHandler = require('../middlewares/async');
 const ErrorResponse = require('../utils/errorResponse');
 const { validationResult } = require('express-validator');
 const { isValidObjectId } = require('mongoose');
 const sendEmail = require('../utils/sendMail');
 const generateOTP = require('../utils/generateOTP');
+const generatePasswordResetToken = require('../utils/generatePasswordResetToken');
 
 exports.signup = asyncHandler(async (req, res, next) => {
   const {
@@ -18,12 +19,6 @@ exports.signup = asyncHandler(async (req, res, next) => {
   }
 
   const user = await User.create({ name, email, password });
-
-  // let token = '';
-  // for (let index = 0; index <= 5; index++) {
-  //   const randomVal = Math.round(Math.random() * 9);
-  //   token += randomVal;
-  // }
 
   const token = generateOTP();
 
@@ -46,7 +41,9 @@ exports.signup = asyncHandler(async (req, res, next) => {
 });
 
 exports.signin = asyncHandler(async (req, res, next) => {
-  const { email, password } = req.body;
+  const {
+    body: { email, password },
+  } = req;
 
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -155,6 +152,101 @@ exports.resendEmailVerification = asyncHandler(async (req, res, next) => {
   return res.status(201).json({
     message:
       'OTP TOKEN has been re-sent to your email. Please verify your account until expiry.',
+  });
+});
+
+exports.forgotPassword = asyncHandler(async (req, res, next) => {
+  const {
+    body: { email },
+  } = req;
+
+  if (!email) {
+    return next(new ErrorResponse('Email is required', 400));
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new ErrorResponse('User not Found', 404));
+  }
+
+  const existPasswordResetToken = await PasswordResetToken.findOne({
+    owner: user._id,
+  });
+
+  if (existPasswordResetToken) {
+    return next(
+      new ErrorResponse(
+        'Only after 1 hour you can request for another token',
+        400
+      )
+    );
+  }
+
+  const token = generatePasswordResetToken();
+  const newPasswordResetToken = await PasswordResetToken.create({
+    owner: user._id,
+    token,
+  });
+
+  const resetPasswordUrl = `http://localhost:3000/reset-password?token=${token}&id=${user._id}`;
+
+  const options = {
+    email: user.email,
+    subject: 'Reset Password Link',
+    message: `<div style=" max-width: 700px; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; font-family: Roboto; font-weight: 600; color: #191a19; "> <span>Reset Password Link</span></div><div style=" padding: 1rem 0; border-top: 1px solid #e5e5e5; border-bottom: 1px solid #e5e5e5; color: #141823; font-size: 17px; font-family: Roboto; "> <span>Hello ${user.email}</span> <div style=" padding: 10px 15px; background: #171816; color: #fff; text-decoration: none; font-weight: 600; " > <p>Click here to reset Password</p> <a href=${resetPasswordUrl}>Change Password</a> </div> <br /></div>`,
+  };
+
+  await sendEmail(options);
+
+  return res.json({ message: 'Link sent to your email' });
+});
+
+exports.resetPassword = asyncHandler(async (req, res, next) => {
+  const {
+    query: { token, id },
+    body: { password },
+  } = req;
+
+  if (!token || !isValidObjectId(id)) {
+    return next(new ErrorResponse('Invalid Token', 400));
+  }
+
+  const passwordResetToken = await PasswordResetToken.findOne({
+    owner: id,
+  });
+
+  if (!passwordResetToken) {
+    return next(new ErrorResponse('Invalid Token', 400));
+  }
+
+  const matchedToken = await passwordResetToken.matchToken(token);
+
+  if (!matchedToken) {
+    return next(new ErrorResponse('Invalid Token', 400));
+  }
+
+  if (!password || password.length < 6) {
+    return next(
+      new ErrorResponse(
+        'Password is required & password length must be at least 6 character',
+        400
+      )
+    );
+  }
+
+  const user = await User.findById(id);
+  if (!user) {
+    return next(new ErrorResponse('User not Found', 400));
+  }
+
+  user.password = password;
+
+  await user.save();
+
+  await passwordResetToken.remove();
+
+  return res.status(200).json({
+    message: 'Password Changed Successfully',
   });
 });
 
