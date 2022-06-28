@@ -252,6 +252,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 
 // Get Token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
+  const { _id, name, email } = user;
   // Create token
   const token = user.getSignedJwtToken();
 
@@ -269,5 +270,8 @@ const sendTokenResponse = (user, statusCode, res) => {
   res.status(statusCode).cookie('token', token, options).json({
     success: true,
     token,
+    _id,
+    name,
+    email,
   });
 };
