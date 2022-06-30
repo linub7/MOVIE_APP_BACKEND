@@ -35,9 +35,12 @@ exports.signup = asyncHandler(async (req, res, next) => {
 
   await sendEmail(options);
 
-  return res.status(201).json({
-    message: 'Please Verify your email. OTP TOKEN has been sent to your email.',
-  });
+  sendTokenResponse(user, 200, res);
+  // return res.status(201).json({
+  //   _id: user._id,
+  //   name: user.name,
+  //   email: user.email,
+  // });
 });
 
 exports.signin = asyncHandler(async (req, res, next) => {
@@ -72,6 +75,8 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
     body: { OTP, userId },
   } = req;
 
+  console.log(userId);
+
   if (!isValidObjectId(userId)) {
     return next(new ErrorResponse('User not Found', 400));
   }
@@ -87,6 +92,8 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
     owner: userId,
   });
 
+  console.log(emailVerificationToken);
+
   if (!emailVerificationToken) {
     return next(new ErrorResponse('Token not Found', 400));
   }
@@ -100,9 +107,8 @@ exports.verifyEmail = asyncHandler(async (req, res, next) => {
   user.isVerified = true;
   await user.save();
   await emailVerificationToken.remove();
-  return res.status(200).json({
-    message: 'Email Verified Successfully. Please Login to Continue',
-  });
+
+  sendTokenResponse(user, 200, res);
 });
 
 exports.resendEmailVerification = asyncHandler(async (req, res, next) => {
@@ -188,7 +194,7 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
     token,
   });
 
-  const resetPasswordUrl = `http://localhost:3000/reset-password?token=${token}&id=${user._id}`;
+  const resetPasswordUrl = `http://localhost:3000/auth/reset-password?token=${token}&id=${user._id}`;
 
   const options = {
     email: user.email,
@@ -201,10 +207,35 @@ exports.forgotPassword = asyncHandler(async (req, res, next) => {
   return res.json({ message: 'Link sent to your email' });
 });
 
+exports.isValidToken = asyncHandler(async (req, res, next) => {
+  const {
+    body: { token, id },
+  } = req;
+
+  if (!token || !isValidObjectId(id)) {
+    return next(new ErrorResponse('Invalid Token', 400));
+  }
+
+  const passwordResetToken = await PasswordResetToken.findOne({
+    owner: id,
+  });
+
+  if (!passwordResetToken) {
+    return next(new ErrorResponse('Invalid Token', 400));
+  }
+
+  const matchedToken = await passwordResetToken.matchToken(token);
+
+  if (!matchedToken) {
+    return next(new ErrorResponse('Invalid Token', 400));
+  }
+
+  return res.status(200).json({ verify: true, message: 'Token is valid' });
+});
+
 exports.resetPassword = asyncHandler(async (req, res, next) => {
   const {
-    query: { token, id },
-    body: { password },
+    body: { password, token, id },
   } = req;
 
   if (!token || !isValidObjectId(id)) {
@@ -252,7 +283,7 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
 
 // Get Token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
-  const { _id, name, email } = user;
+  const { _id, name, email, isVerified } = user;
   // Create token
   const token = user.getSignedJwtToken();
 
@@ -273,5 +304,6 @@ const sendTokenResponse = (user, statusCode, res) => {
     _id,
     name,
     email,
+    isVerified,
   });
 };
