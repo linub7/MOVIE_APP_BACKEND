@@ -281,9 +281,24 @@ exports.resetPassword = asyncHandler(async (req, res, next) => {
   });
 });
 
+exports.getMe = asyncHandler(async (req, res, next) => {
+  const {
+    user: { _id },
+  } = req;
+  console.log(_id);
+
+  const user = await User.findById(_id);
+
+  if (!user) {
+    return next(new ErrorResponse('User not Found', 400));
+  }
+
+  sendTokenResponse(user, 200, res);
+});
+
 // Get Token from model, create cookie and send response
 const sendTokenResponse = (user, statusCode, res) => {
-  const { _id, name, email, isVerified } = user;
+  const { _id, name, email, isVerified, role } = user;
   // Create token
   const token = user.getSignedJwtToken();
 
@@ -305,5 +320,6 @@ const sendTokenResponse = (user, statusCode, res) => {
     name,
     email,
     isVerified,
+    role,
   });
 };

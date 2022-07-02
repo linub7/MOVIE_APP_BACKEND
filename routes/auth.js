@@ -7,7 +7,9 @@ const {
   forgotPassword,
   resetPassword,
   isValidToken,
+  getMe,
 } = require('../controllers/auth');
+const { protect } = require('../middlewares/auth');
 const {
   signupValidators,
   signinValidators,
@@ -23,6 +25,7 @@ router.post('/is-valid-token', isValidToken);
 router.post('/resend-verify-email', resendEmailVerification);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
+router.get('/me', protect, getMe);
 // router.post('/reset-password', resetPassword);
 
 module.exports = router;
