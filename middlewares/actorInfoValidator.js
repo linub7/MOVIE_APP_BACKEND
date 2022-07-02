@@ -8,9 +8,7 @@ exports.actorInfoValidators = [
     .isEmpty()
     .withMessage('About is a required field!'),
   check('gender')
-    .trim()
-    .not()
-    .isEmpty()
+    .isIn(['male', 'female'])
     .withMessage('Gender is a required field!'),
 ];
 
