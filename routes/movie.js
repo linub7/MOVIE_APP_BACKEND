@@ -1,5 +1,11 @@
 const express = require('express');
-const { uploadTrailer, createMovie } = require('../controllers/movie');
+const {
+  uploadTrailer,
+  createMovie,
+  updateMovieWithoutPoster,
+  updateMovieWithPoster,
+  deleteMovie,
+} = require('../controllers/movie');
 const { protect, authorize } = require('../middlewares/auth');
 const {
   movieValidators,
@@ -28,5 +34,28 @@ router.post(
   // movieValidator,
   createMovie
 );
+
+router.patch(
+  '/movie/without-poster/:movieId',
+  protect,
+  authorize('admin'),
+  parseData,
+  movieValidators,
+  movieValidator,
+  updateMovieWithoutPoster
+);
+
+router.patch(
+  '/movie/with-poster/:movieId',
+  protect,
+  authorize('admin'),
+  uploadImage.single('poster'),
+  parseData,
+  movieValidators,
+  movieValidator,
+  updateMovieWithPoster
+);
+
+router.delete('/movie/:movieId', protect, authorize('admin'), deleteMovie);
 
 module.exports = router;

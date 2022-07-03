@@ -13,6 +13,7 @@ const movieSchema = new mongoose.Schema(
       type: String,
       trim: true,
       required: true,
+      unique: true,
     },
     storyLine: {
       type: String,
@@ -77,7 +78,10 @@ const movieSchema = new mongoose.Schema(
       required: true,
     },
     reviews: [{ type: ObjectId, ref: 'Review' }],
-    languages: [{ type: String, required: true }],
+    language: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true }
 );

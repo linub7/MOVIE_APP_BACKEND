@@ -48,10 +48,10 @@ exports.movieValidators = [
       }
       return true;
     }),
-  check('poster').custom((_, { req }) => {
-    if (!req.file) throw new Error('Please Provide a poster');
-    return true;
-  }),
+  // check('poster').custom((_, { req }) => {
+  //   if (!req.file) throw new Error('Please Provide a poster');
+  //   return true;
+  // }),
   check('trailer')
     .isObject()
     .withMessage('Please Provide a trailer')
