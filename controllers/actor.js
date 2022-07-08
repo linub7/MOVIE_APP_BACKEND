@@ -126,3 +126,9 @@ exports.getSingleActor = asyncHandler(async (req, res, next) => {
 
   res.json(actor);
 });
+
+exports.getActors = asyncHandler(async (req, res, next) => {
+  const result = await Actor.find({});
+
+  res.json(result);
+});

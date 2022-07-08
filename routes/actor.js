@@ -6,6 +6,7 @@ const {
   searchActor,
   getLatestUploadedActors,
   getSingleActor,
+  getActors,
 } = require('../controllers/actor');
 const {
   actorInfoValidators,
@@ -21,9 +22,9 @@ router.post(
   '/actors/create',
   protect,
   authorize('admin'),
-  // actorInfoValidators,
-  // actorInfoValidate,
   uploadImage.single('avatar'),
+  actorInfoValidators,
+  actorInfoValidate,
   createActor
 );
 
@@ -39,5 +40,6 @@ router.delete('/actors/:actorId', protect, authorize('admin'), deleteActor);
 router.get('/actors/search', searchActor);
 router.get('/actors/:actorId', getSingleActor);
 router.get('/actors/latest-uploads', getLatestUploadedActors);
+router.get('/actors', getActors);
 
 module.exports = router;
