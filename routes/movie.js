@@ -30,8 +30,8 @@ router.post(
   authorize('admin'),
   uploadImage.single('poster'),
   parseData,
-  // movieValidators,
-  // movieValidator,
+  movieValidators,
+  movieValidator,
   createMovie
 );
 

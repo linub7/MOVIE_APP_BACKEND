@@ -22,7 +22,7 @@ const movieSchema = new mongoose.Schema(
     },
     director: {
       type: ObjectId,
-      ref: 'Actor',
+      ref: 'Director',
     },
     releaseDate: {
       type: Date,
@@ -58,10 +58,8 @@ const movieSchema = new mongoose.Schema(
     ],
     writers: [
       {
-        type: {
-          type: ObjectId,
-          ref: 'Actor',
-        },
+        type: ObjectId,
+        ref: 'Writer',
       },
     ],
     poster: {
