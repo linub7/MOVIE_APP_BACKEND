@@ -319,3 +319,19 @@ exports.deleteMovie = asyncHandler(async (req, res, next) => {
     message: 'Movie is deleted successfully',
   });
 });
+
+exports.getMoviesByAdmin = asyncHandler(async (req, res, next) => {
+  const {
+    query: { pageNo, limit },
+  } = req;
+  const count = await Movie.countDocuments();
+  const result = await Movie.find({})
+    .sort('-createdAt')
+    .skip(parseInt(pageNo) * parseInt(limit))
+    .limit(parseInt(limit));
+
+  res.json({
+    result,
+    count,
+  });
+});
