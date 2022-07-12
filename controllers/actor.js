@@ -128,7 +128,14 @@ exports.getSingleActor = asyncHandler(async (req, res, next) => {
 });
 
 exports.getActors = asyncHandler(async (req, res, next) => {
-  const result = await Actor.find({});
+  const {
+    query: { pageNo, limit },
+  } = req;
+  const count = await Actor.countDocuments();
+  const result = await Actor.find({})
+    .sort('-createdAt')
+    .limit(parseInt(limit))
+    .skip(parseInt(pageNo) * parseInt(limit));
 
-  res.json(result);
+  res.json({ result, count });
 });

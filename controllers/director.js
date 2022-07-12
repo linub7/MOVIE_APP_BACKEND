@@ -130,7 +130,14 @@ exports.getSingleDirector = asyncHandler(async (req, res, next) => {
 });
 
 exports.getDirectors = asyncHandler(async (req, res, next) => {
-  const result = await Director.find({});
+  const {
+    query: { pageNo, limit },
+  } = req;
+  const count = await Director.countDocuments();
+  const result = await Director.find({})
+    .sort('-createdAt')
+    .limit(parseInt(limit))
+    .skip(parseInt(pageNo) * parseInt(limit));
 
-  res.json(result);
+  res.json({ result, count });
 });

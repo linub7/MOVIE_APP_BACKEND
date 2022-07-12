@@ -40,6 +40,6 @@ router.delete('/actors/:actorId', protect, authorize('admin'), deleteActor);
 router.get('/actors/search', searchActor);
 router.get('/actors/:actorId', getSingleActor);
 router.get('/actors/latest-uploads', getLatestUploadedActors);
-router.get('/actors', getActors);
+router.get('/actors', protect, authorize('admin'), getActors);
 
 module.exports = router;

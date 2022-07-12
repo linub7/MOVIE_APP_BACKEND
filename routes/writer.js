@@ -42,6 +42,6 @@ router.delete('/writers/:writerId', protect, authorize('admin'), deleteWriter);
 router.get('/writers/search', searchWriter);
 router.get('/writers/:writerId', getSingleWriter);
 router.get('/writers/latest-uploads', getLatestUploadedWriters);
-router.get('/writers', getWriters);
+router.get('/writers', protect, authorize('admin'), getWriters);
 
 module.exports = router;

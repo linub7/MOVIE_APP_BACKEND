@@ -47,6 +47,6 @@ router.delete(
 router.get('/directors/search', protect, authorize('admin'), searchDirector);
 router.get('/directors/:directorId', getSingleDirector);
 router.get('/directors/latest-uploads', getLatestUploadedDirectors);
-router.get('/directors', getDirectors);
+router.get('/directors', protect, authorize('admin'), getDirectors);
 
 module.exports = router;
