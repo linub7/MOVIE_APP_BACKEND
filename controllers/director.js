@@ -2,6 +2,7 @@ const { isValidObjectId } = require('mongoose');
 const asyncHandler = require('../middlewares/async');
 const ErrorResponse = require('../utils/errorResponse');
 const Director = require('../models/director');
+const Movie = require('../models/movie');
 const {
   uploadImageToCloudinary,
   destroyImageFromCloudinary,
@@ -83,6 +84,12 @@ exports.deleteDirector = asyncHandler(async (req, res, next) => {
     if (result !== 'ok')
       return next(new ErrorResponse('Error deleting image', 500));
   }
+
+  const movies = await Movie.find({ director: directorId });
+  movies.forEach(async (movie) => {
+    movie.director = null;
+    await movie.save();
+  });
 
   await director.remove();
 

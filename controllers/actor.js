@@ -2,6 +2,7 @@ const { isValidObjectId } = require('mongoose');
 const asyncHandler = require('../middlewares/async');
 const ErrorResponse = require('../utils/errorResponse');
 const Actor = require('../models/actor');
+const Movie = require('../models/movie');
 const {
   uploadImageToCloudinary,
   destroyImageFromCloudinary,
@@ -88,6 +89,13 @@ exports.deleteActor = asyncHandler(async (req, res, next) => {
       return next(new ErrorResponse('Error deleting image', 500));
   }
 
+  const movies = await Movie.find({ 'cast.actor': actorId });
+  movies.forEach(async (movie) => {
+    const cast = movie.cast.filter((castMember) => castMember.actor.toString() !== actorId);
+    movie.cast = cast;
+    await movie.save();
+  })
+
   await actor.remove();
 
   res.status(200).json({
@@ -138,4 +146,14 @@ exports.getActors = asyncHandler(async (req, res, next) => {
     .skip(parseInt(pageNo) * parseInt(limit));
 
   res.json({ result, count });
+});
+
+exports.testActor = asyncHandler(async (req, res, next) => {
+  const {
+    params: { actorId },
+  } = req;
+
+  const movies = await Movie.find({ 'cast.actor': actorId });
+
+  res.json(movies);
 });
