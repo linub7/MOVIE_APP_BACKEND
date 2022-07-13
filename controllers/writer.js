@@ -56,16 +56,12 @@ exports.updateWriter = asyncHandler(async (req, res, next) => {
   }
 
   writer.name = name ? name : writer.name;
-  writer.about = about ? about : writer.about;
-  writer.gender = gender ? gender : writer.gender;
 
   await writer.save();
 
   res.status(201).json({
     id: writer._id,
     name: writer.name,
-    about: writer.about,
-    gender: writer.gender,
     avatar: writer?.avatar?.url,
   });
 });

@@ -58,16 +58,12 @@ exports.updateDirector = asyncHandler(async (req, res, next) => {
   }
 
   director.name = name ? name : director.name;
-  director.about = about ? about : director.about;
-  director.gender = gender ? gender : director.gender;
 
   await director.save();
 
   res.status(201).json({
     id: director._id,
     name: director.name,
-    about: director.about,
-    gender: director.gender,
     avatar: director?.avatar?.url,
   });
 });

@@ -33,6 +33,8 @@ router.put(
   uploadImage.single('avatar'),
   protect,
   authorize('admin'),
+  actorInfoValidators,
+  actorInfoValidate,
   updateActor
 );
 
