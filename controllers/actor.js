@@ -91,10 +91,12 @@ exports.deleteActor = asyncHandler(async (req, res, next) => {
 
   const movies = await Movie.find({ 'cast.actor': actorId });
   movies.forEach(async (movie) => {
-    const cast = movie.cast.filter((castMember) => castMember.actor.toString() !== actorId);
+    const cast = movie.cast.filter(
+      (castMember) => castMember.actor.toString() !== actorId
+    );
     movie.cast = cast;
     await movie.save();
-  })
+  });
 
   await actor.remove();
 
@@ -108,7 +110,12 @@ exports.searchActor = asyncHandler(async (req, res, next) => {
     query: { name },
   } = req;
 
-  const result = await Actor.find({ $text: { $search: `"${name}"` } }); // `"${name}"` : extract only query string
+  if (!name.trim()) return next(new ErrorResponse('Invalid Request', 400));
+
+  // const result = await Actor.find({ $text: { $search: `"${name}"` } }); // `"${name}"` : extract only query string
+  const result = await Actor.find({
+    name: { $regex: `.*${name}.*`, $options: 'i' },
+  });
 
   res.json(result);
 });

@@ -102,8 +102,12 @@ exports.searchDirector = asyncHandler(async (req, res, next) => {
   const {
     query: { name },
   } = req;
+  if (!name.trim()) return next(new ErrorResponse('Invalid Request', 400));
 
-  const result = await Director.find({ $text: { $search: `"${name}"` } }); // `"${name}"` : extract only query string
+  // const result = await Director.find({ $text: { $search: `"${name}"` } }); // `"${name}"` : extract only query string
+  const result = await Director.find({
+    name: { $regex: `.*${name}.*`, $options: 'i' },
+  });
 
   res.json(result);
 });
