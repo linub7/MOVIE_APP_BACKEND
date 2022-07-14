@@ -6,6 +6,7 @@ const {
   updateMovieWithPoster,
   deleteMovie,
   getMoviesByAdmin,
+  searchMovieByAdmin,
 } = require('../controllers/movie');
 const { protect, authorize } = require('../middlewares/auth');
 const {
@@ -60,5 +61,7 @@ router.patch(
 router.delete('/movie/:movieId', protect, authorize('admin'), deleteMovie);
 
 router.get('/movies-admin', protect, authorize('admin'), getMoviesByAdmin);
+
+router.get('/movies/search', protect, authorize('admin'), searchMovieByAdmin);
 
 module.exports = router;
