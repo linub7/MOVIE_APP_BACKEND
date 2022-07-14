@@ -326,6 +326,9 @@ exports.getMoviesByAdmin = asyncHandler(async (req, res, next) => {
   } = req;
   const count = await Movie.countDocuments();
   const result = await Movie.find({})
+    .populate('director')
+    .populate('writers')
+    .populate('cast.actor')
     .sort('-createdAt')
     .skip(parseInt(pageNo) * parseInt(limit))
     .limit(parseInt(limit));
