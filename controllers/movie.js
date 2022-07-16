@@ -339,22 +339,22 @@ exports.getMoviesByAdmin = asyncHandler(async (req, res, next) => {
   });
 });
 
-exports.searchMovieByAdmin = asyncHandler(async (req, res, next) => {
-  {
-    /**
- const {
-    query: { name },
-  } = req;
-  if (!name.trim()) return next(new ErrorResponse('Invalid Request', 400));
+exports.getLatestUploadsByAdmin = asyncHandler(async (req, res, next) => {
+  const count = await Movie.countDocuments();
+  const result = await Movie.find({})
+    .populate('director')
+    .populate('writers')
+    .populate('cast.actor')
+    .sort('-createdAt')
+    .limit(6);
 
-  // const result = await Director.find({ $text: { $search: `"${name}"` } }); // `"${name}"` : extract only query string
-  const result = await Director.find({
-    name: { $regex: `.*${name}.*`, $options: 'i' },
+  res.json({
+    result,
+    count,
   });
+});
 
-  res.json(result);
- */
-  }
+exports.searchMovieByAdmin = asyncHandler(async (req, res, next) => {
   const {
     query: { title },
   } = req;
