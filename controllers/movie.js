@@ -366,3 +366,18 @@ exports.searchMovieByAdmin = asyncHandler(async (req, res, next) => {
 
   res.json(result);
 });
+
+exports.getMovieById = asyncHandler(async (req, res, next) => {
+  const {
+    params: { movieId },
+  } = req;
+
+  if (!isValidObjectId(movieId))
+    return next(new ErrorResponse('Invalid movie id', 400));
+
+  const movie = await Movie.findById(movieId).populate('reviews');
+
+  if (!movie) return next(new ErrorResponse('Movie not found', 404));
+
+  res.json(movie);
+});
