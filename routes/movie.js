@@ -9,6 +9,9 @@ const {
   searchMovieByAdmin,
   getLatestUploadsByAdmin,
   getMovieById,
+  getLatestUploadsByUser,
+  getRelatedMoviesByTag,
+  topRatedMovies,
 } = require('../controllers/movie');
 const { protect, authorize } = require('../middlewares/auth');
 const {
@@ -70,7 +73,11 @@ router.get(
   getLatestUploadsByAdmin
 );
 
-router.get('/movies/:movieId', protect, authorize('admin'), getMovieById);
+router.get('/movies/latest-uploads-user', getLatestUploadsByUser);
+
 router.get('/movies/search', protect, authorize('admin'), searchMovieByAdmin);
+router.get('/movies/top-rated', topRatedMovies);
+router.get('/movies/:movieId', getMovieById);
+router.get('/movies/related-by-tag/:movieId', getRelatedMoviesByTag);
 
 module.exports = router;
