@@ -378,6 +378,7 @@ exports.getLatestUploadsByUser = asyncHandler(async (req, res, next) => {
       title: movie.title,
       storyLine: movie.storyLine,
       poster: movie.poster?.url,
+      responsivePosters: movie?.poster?.responsive,
       trailer: movie.trailer?.url,
     };
   });
@@ -502,6 +503,7 @@ exports.getRelatedMoviesByTag = asyncHandler(async (req, res, next) => {
         _id: movie._id,
         title: movie.title,
         poster: movie.poster,
+        responsivePosters: movie?.responsivePosters,
         reviews: { ...reviews },
       };
     })
@@ -524,6 +526,7 @@ exports.topRatedMovies = asyncHandler(async (req, res, next) => {
         _id: movie._id,
         title: movie.title,
         poster: movie.poster,
+        responsivePosters: movie.responsivePosters,
         reviews: { ...reviews },
       };
     })

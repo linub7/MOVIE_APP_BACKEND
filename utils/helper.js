@@ -73,6 +73,7 @@ exports.relatedMoviesPipeline = (movie) => {
       $project: {
         title: 1,
         poster: '$poster.url',
+        responsivePosters: '$poster.responsive',
       },
     },
     {
@@ -120,6 +121,7 @@ exports.topRatedMoviesPipeline = (type) => {
       $project: {
         title: 1,
         poster: '$poster.url',
+        responsivePosters: '$poster.responsive',
         reviewsCount: {
           $size: '$reviews',
         },
