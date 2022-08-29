@@ -5,6 +5,7 @@ const {
   updateReview,
   deleteReview,
   getReviewsByMovie,
+  getMovieReviewsByUser,
 } = require('../controllers/review');
 const { protect, authorize } = require('../middlewares/auth');
 const {
@@ -21,6 +22,14 @@ router.post(
   reviewValidate,
   addReview
 );
+
+router.get(
+  '/reviews-by-user/:movieId',
+  protect,
+  authorize('admin', 'user'),
+  getMovieReviewsByUser
+);
+
 router.get(
   '/reviews/:movieId/:reviewId',
   protect,

@@ -150,3 +150,23 @@ exports.getReviewsByMovie = asyncHandler(async (req, res, next) => {
 
   return res.status(200).json(movie.reviews);
 });
+
+exports.getMovieReviewsByUser = asyncHandler(async (req, res, next) => {
+  const {
+    params: { movieId },
+  } = req;
+
+  if (!isValidObjectId(movieId))
+    return next(new ErrorResponse('Movie not found', 400));
+
+  const movie = await Movie.findById(movieId)
+    .populate({
+      path: 'reviews',
+      populate: { path: 'owner', select: 'name' },
+      select: 'rating content',
+    })
+    .select('reviews');
+  if (!movie) return next(new ErrorResponse('Movie not Found', 400));
+
+  return res.status(200).json(movie.reviews);
+});
