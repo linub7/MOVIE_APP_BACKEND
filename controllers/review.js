@@ -96,12 +96,12 @@ exports.deleteReview = asyncHandler(async (req, res, next) => {
     user: { _id, role },
     params: { reviewId },
   } = req;
-  console.log(role);
+  console.log(reviewId);
 
   if (!isValidObjectId(reviewId))
     return next(new ErrorResponse('Review not found', 400));
 
-  const review = await Review.findByOne({ owner: _id, _id: reviewId });
+  const review = await Review.findOne({ owner: _id, _id: reviewId });
   if (!review) return next(new ErrorResponse('Review not Found', 400));
 
   if (!isValidObjectId(review.parentMovie))
@@ -128,7 +128,9 @@ exports.deleteReview = asyncHandler(async (req, res, next) => {
 
   await movie.save();
 
-  return res.status(200).json({ message: 'Review deleted' });
+  const reviewsCount = await Review.countDocuments({ parentMovie: movie._id });
+
+  return res.status(200).json({ message: 'Review deleted', reviewsCount });
 });
 
 exports.getReviewsByMovie = asyncHandler(async (req, res, next) => {
@@ -165,8 +167,8 @@ exports.getMovieReviewsByUser = asyncHandler(async (req, res, next) => {
       populate: { path: 'owner', select: 'name' },
       select: 'rating content',
     })
-    .select('reviews');
+    .select('reviews title');
   if (!movie) return next(new ErrorResponse('Movie not Found', 400));
 
-  return res.status(200).json(movie.reviews);
+  return res.status(200).json({ reviews: movie.reviews, movie: movie.title });
 });
