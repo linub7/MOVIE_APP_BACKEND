@@ -78,7 +78,7 @@ exports.updateReview = asyncHandler(async (req, res, next) => {
   if (!movie) return next(new ErrorResponse('Movie not Found', 400));
 
   for (const review of movie.reviews) {
-    if (review.toString() === reviewId.toString()) {
+    if (review._id.toString() === reviewId.toString()) {
       movie.reviews.splice(movie.reviews.indexOf(review), 1);
       break;
     }
@@ -87,8 +87,12 @@ exports.updateReview = asyncHandler(async (req, res, next) => {
   movie.reviews.push(review._id);
 
   await movie.save();
+  const reviews = await Review.find({ parentMovie: movie._id }).populate(
+    'owner',
+    '_id name'
+  );
 
-  return res.status(200).json({ message: 'Review updated', review });
+  return res.status(200).json({ message: 'Review updated', review, reviews });
 });
 
 exports.deleteReview = asyncHandler(async (req, res, next) => {
