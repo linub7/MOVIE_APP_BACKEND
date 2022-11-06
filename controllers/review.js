@@ -6,13 +6,20 @@ const Movie = require('../models/movie');
 
 exports.addReview = asyncHandler(async (req, res, next) => {
   const {
-    user: { _id },
+    user: { _id, isVerified },
     body: { parentMovie, rating, content },
   } = req;
   if (!isValidObjectId(parentMovie))
     return next(new ErrorResponse('Movie not Found', 400));
   if (!isValidObjectId(_id))
     return next(new ErrorResponse('Owner not found', 400));
+  if (!isVerified)
+    return next(
+      new ErrorResponse(
+        'Your Account is not verified. Verify Your Account Please',
+        400
+      )
+    );
 
   const movie = await Movie.findById(parentMovie)
     .populate('reviews', 'owner')

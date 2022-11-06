@@ -3,6 +3,7 @@ const ErrorResponse = require('../utils/errorResponse');
 const cloudinary = require('../cloud');
 const Movie = require('../models/movie');
 const Review = require('../models/review');
+const User = require('../models/user');
 const { isValidObjectId } = require('mongoose');
 const {
   uploadImageToCloudinary,
@@ -399,6 +400,22 @@ exports.searchMovieByAdmin = asyncHandler(async (req, res, next) => {
   res.json(result);
 });
 
+exports.searchMovieByUser = asyncHandler(async (req, res, next) => {
+  const {
+    query: { title },
+  } = req;
+  if (!title.trim()) return next(new ErrorResponse('Invalid Request', 400));
+
+  const result = await Movie.find({
+    title: { $regex: `.*${title}.*`, $options: 'i' },
+    status: 'public',
+  })
+    .select('title poster')
+    .sort('-createdAt');
+
+  res.json(result);
+});
+
 exports.getMovieById = asyncHandler(async (req, res, next) => {
   const {
     params: { movieId },
@@ -527,6 +544,31 @@ exports.topRatedMovies = asyncHandler(async (req, res, next) => {
         title: movie.title,
         poster: movie.poster,
         responsivePosters: movie.responsivePosters,
+        reviews: { ...reviews },
+      };
+    })
+  );
+
+  res.json(topRatedMoviesResults);
+});
+
+exports.getAppAllInformation = asyncHandler(async (req, res, next) => {
+  const movies = await Movie.countDocuments();
+  const reviews = await Review.countDocuments();
+  const users = await User.countDocuments();
+
+  res.json({ movies, reviews, users });
+});
+
+exports.getMostRatedMovies = asyncHandler(async (req, res, next) => {
+  const movies = await Movie.aggregate(topRatedMoviesPipeline());
+
+  const topRatedMoviesResults = await Promise.all(
+    movies.map(async (movie) => {
+      const reviews = await getMovieRatingAverage(movie._id);
+      return {
+        _id: movie._id,
+        title: movie.title,
         reviews: { ...reviews },
       };
     })
