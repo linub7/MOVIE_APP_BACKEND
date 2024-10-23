@@ -16,12 +16,16 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 app.use(express.json());
-app.use(cors({ origin: process.env.FRONTEND_URL }));
+app.use(cors());
 app.use(mongoSanitize());
 
 readdirSync('./routes').map((r) =>
   app.use('/api/v1', require('./routes/' + r))
 );
+
+app.use('/', (req, res) => {
+  res.json({ message: 'OK' });
+});
 
 mongoose
   .connect(process.env.MONGO_URI)
